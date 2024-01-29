@@ -181,55 +181,6 @@ class RAG():
     are then stored in a KV so that it can be retrieved later.
     """
 
-    requirement_dependency = [
-        "openai",  # for openai client usage.
-    ]
-
-    extra_files = glob.glob("ui/**/*", recursive=True)
-
-    deployment_template = {
-        # All actual computations are carried out via remote apis, so
-        # we will use a cpu.small instance which is already enough for most of
-        # the work.
-        "resource_shape": "cpu.small",
-        # You most likely don't need to change this.
-        "env": {
-            # Choose the backend. Currently, we support BING and GOOGLE. For
-            # simplicity, in this demo, if you specify the backend as LEPTON,
-            # we will use the hosted serverless version of lepton search api
-            # at https://search-api.lepton.run/ to do the search and RAG, which
-            # runs the same code (slightly modified and might contain improvements)
-            # as this demo.
-            "BACKEND": "LEPTON",
-            # If you are using google, specify the search cx.
-            "GOOGLE_SEARCH_CX": "",
-            # Specify the LLM model you are going to use.
-            "LLM_MODEL": "mixtral-8x7b",
-            # For all the search queries and results, we will use the Lepton KV to
-            # store them so that we can retrieve them later. Specify the name of the
-            # KV here.
-            "KV_NAME": "search-with-lepton",
-            # If set to true, will generate related questions. Otherwise, will not.
-            "RELATED_QUESTIONS": "true",
-            # On the lepton platform, allow web access when you are logged in.
-            "LEPTON_ENABLE_AUTH_BY_COOKIE": "true",
-        },
-        # Secrets you need to have: search api subscription key, and lepton
-        # workspace token to query lepton's llama models.
-        "secret": [
-            # If you use BING, you need to specify the subscription key. Otherwise
-            # it is not needed.
-            "BING_SEARCH_V7_SUBSCRIPTION_KEY",
-            # If you use GOOGLE, you need to specify the search api key. Note that
-            # you should also specify the cx in the env.
-            "GOOGLE_SEARCH_API_KEY",
-            # If you use Serper, you need to specify the search api key.
-            "SERPER_SEARCH_API_KEY",
-            # You need to specify the workspace token to query lepton's LLM models.
-            "LEPTON_WORKSPACE_TOKEN",
-        ],
-    }
-
     # It's just a bunch of api calls, so our own deployment can be made massively
     # concurrent.
     handler_max_concurrency = 16
@@ -289,130 +240,16 @@ class RAG():
         self.executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=self.handler_max_concurrency * 2
         )
-        # whether we should generate related questions.
-        self.should_do_related_questions = bool(os.environ["RELATED_QUESTIONS"])
-
-    def get_related_questions(self, query, contexts):
-        """
-        Gets related questions based on the query and context.
-        """
-
-        def ask_related_questions(
-            questions: Annotated[
-                List[str],
-                [(
-                    "question",
-                    Annotated[
-                        str, "related question to the original question and context."
-                    ],
-                )],
-            ]
-        ):
-            """
-            ask further questions that are related to the input and output.
-            """
-            pass
-
-        try:
-            response = self.local_client().chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": _more_questions_prompt.format(
-                            context="\n\n".join([c["snippet"] for c in contexts])
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": query,
-                    },
-                ],
-                tools=[{
-                    "type": "function",
-                    "function": tool.get_tools_spec(ask_related_questions),
-                }],
-                max_tokens=512,
-            )
-            related = response.choices[0].message.tool_calls[0].function.arguments
-            if isinstance(related, str):
-                related = json.loads(related)
-            logger.trace(f"Related questions: {related}")
-            return related["questions"][:5]
-        except Exception as e:
-            # For any exceptions, we will just return an empty list.
-            logger.error(
-                "encountered error while generating related questions:"
-                f" {e}\n{traceback.format_exc()}"
-            )
-            return []
-
-    def _raw_stream_response(
-        self, contexts, llm_response, related_questions_future
-    ) -> Generator[str, None, None]:
-        """
-        A generator that yields the raw stream response. You do not need to call
-        this directly. Instead, use the stream_and_upload_to_kv which will also
-        upload the response to KV.
-        """
-        # First, yield the contexts.
-        yield json.dumps(contexts)
-        yield "\n\n__LLM_RESPONSE__\n\n"
-        # Second, yield the llm response.
-        if not contexts:
-            # Prepend a warning to the user
-            yield (
-                "(The search engine returned nothing for this query. Please take the"
-                " answer with a grain of salt.)\n\n"
-            )
-        for chunk in llm_response:
-            if chunk.choices:
-                yield chunk.choices[0].delta.content or ""
-                #print(chunk.choices[0].delta.content or "")
-        # Third, yield the related questions. If any error happens, we will just
-        # return an empty list.
-        if related_questions_future is not None:
-            related_questions = related_questions_future.result()
-            try:
-                result = json.dumps(related_questions)
-            except Exception as e:
-                logger.error(f"encountered error: {e}\n{traceback.format_exc()}")
-                result = "[]"
-            yield "\n\n__RELATED_QUESTIONS__\n\n"
-            yield result
-
-    def stream_and_upload_to_kv(
-        self, contexts, llm_response, related_questions_future, search_uuid
-    ) -> Generator[str, None, None]:
-        """
-        Streams the result and uploads to KV.
-        """
-        # First, stream and yield the results.
-        all_yielded_results = []
-        for result in self._raw_stream_response(
-            contexts, llm_response, related_questions_future
-        ):
-            all_yielded_results.append(result)
-            yield result
 
     def query_function(
         self,
         query: str,
-        search_uuid: str,
-        generate_related_questions: Optional[bool] = True,
-    ) -> StreamingResponse:
+    ):
         """
         Query the search engine and returns the response.
 
         The query can have the following fields:
             - query: the user query.
-            - search_uuid: a uuid that is used to store or retrieve the search result. If
-                the uuid does not exist, generate and write to the kv. If the kv
-                fails, we generate regardless, in favor of availability. If the uuid
-                exists, return the stored result.
-            - generate_related_questions: if set to false, will not generate related
-                questions. Otherwise, will depend on the environment variable
-                RELATED_QUESTIONS. Default: true.
         """
 
         # First, do a search query.
@@ -426,6 +263,12 @@ class RAG():
                 [f"[[citation:{i+1}]] {c['snippet']}" for i, c in enumerate(contexts)]
             )
         )
+        print("#"* 30)
+        print("system_prompt:")
+        print(system_prompt)
+        print("#"* 30)
+        print("query:")
+        print(query)
         try:
             client = self.local_client()
             llm_response = client.chat.completions.create(
@@ -439,35 +282,22 @@ class RAG():
                 #stream=True,
                 temperature=0.9,
             )
-            print("xx", llm_response)
-            if self.should_do_related_questions and generate_related_questions:
-                # While the answer is being generated, we can start generating
-                # related questions as a future.
-                ## by dwk ...xxx not succ now.......
-                related_questions_future = None
-#                related_questions_future = self.executor.submit(
-#                    self.get_related_questions, query, contexts
-#                )
-            else:
-                related_questions_future = None
         except Exception as e:
             logger.error(f"encountered error: {e}\n{traceback.format_exc()}")
-            return HTMLResponse("Internal server error.", 503)
+            return
 
-#        return StreamingResponse(
-#            self.stream_and_upload_to_kv(
-#                contexts, llm_response, related_questions_future, search_uuid
-#            ),
-#            media_type="text/html",
-#        )
-#
+        print("#"* 30)
+        print("llm_response:")
+        print(llm_response)
+        print("#"* 30)
+        print("response content:")
+        print(llm_response.choices[0].message.content)
+
 
 if __name__ == "__main__":
     rag = RAG()
     rag.init()
-    qq = "bytedance"
+    qq = "中国"
     rag.query_function(
-        query=qq,
-        search_uuid="",
-        generate_related_questions=True)
+        query=qq)
 

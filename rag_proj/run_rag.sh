@@ -3,4 +3,5 @@
 
 export OPENAI_API_KEY='sk-xxxx'
 export GOOGLE_SEARCH_API_KEY=xxx
+source ../token.sh
 RELATED_QUESTIONS=1 LLM_MODEL=gpt-3.5-turbo-1106 GOOGLE_SEARCH_CX=14c612a1e778d40b3 BACKEND=GOOGLE python rag.py
