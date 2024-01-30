@@ -55,7 +55,7 @@ Remember, don't blindly repeat the contexts verbatim. And here is the user quest
 
 # A set of stop words to use - this is not a complete set, and you may want to
 # add more given your observation.
-stop_words = [
+old_stop_words = [
     "<|im_end|>",
     "[End]",
     "[end]",
@@ -63,6 +63,14 @@ stop_words = [
     "\nSources:\n",
     "End.",
 ]
+stop_words = [
+    "<|im_end|>",
+    "[End]",
+    "[end]",
+    "End.",
+]
+
+
 
 # This is the prompt that asks the model to generate related questions to the
 # original question and the contexts.
@@ -278,7 +286,7 @@ class RAG():
                     {"role": "user", "content": query},
                 ],
                 max_tokens=1024,
-                #stop=stop_words,
+                stop=stop_words,
                 #stream=True,
                 temperature=0.9,
             )
