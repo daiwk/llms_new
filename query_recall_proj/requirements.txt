@@ -1,0 +1,11 @@
+scikit-learn
+faiss-gpu
+cityhash
+datasets
+torch
+transformers==4.22.1
+keras==2.10.0
+tensorflow-gpu==2.10.0
+sentence-transformers==2.2.2
+evaluate
+annoy
