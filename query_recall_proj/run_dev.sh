@@ -6,19 +6,21 @@ set -x
 
 date=dev
 
-hadoop_prefix="hdfs://"
+hadoop_prefix="hdfs://haruna"
 hadoop_cmd="hadoop"
 python3=python3
 python2=python2
 
 
 cur_query_file=dev.query.txt
+cur_query_ecom_file=dev.query_ecom.txt
+cur_query_not_ecom_file=dev.query_not_ecom.txt
 
 
 
 if [[ x$FLAG == x"off" ]]; then
     split_lines=10000
-    date=20241229
+    date=20231229
     export g_per_query_res_min_cnt=20
     export g_cos_threshold=0.8
     export query_batch_size=100
@@ -51,11 +53,11 @@ function parallel_get_sim_res()
     rm $all_file.*
     $python3 -u get_sentence_bert_faiss.py $author_file ${query_file} ./latest_model $all_file
 
-    $python3 ./trans_format.py ./$all_file
+    $python3 ./trans_format_full.py ./$all_file ./$query_file
     xtarget_path=$hadoop_prefix/dev_recall_res/
     $hadoop_cmd fs -mkdir $xtarget_path
-    $hadoop_cmd fs -rmr $target_path/$all_file.save 
-    $hadoop_cmd fs -put ./$all_file.save $target_path
+    $hadoop_cmd fs -rmr $xtarget_path/$all_file.save 
+    $hadoop_cmd fs -put ./$all_file.save $xtarget_path
 
 }
 
@@ -69,8 +71,9 @@ function get_recall_res()
 {
     author_file=$1
     cate_type=$2
-    xtag=${model_name}_${cate_type}_${pre_tag}
-    parallel_get_sim_res $cur_query_file $author_file.vec sbs_${xtag} recall_res_${xtag}.$date 
+	query_file=$3
+    xtag=${model_name}_${cate_type}_${query_file}
+    parallel_get_sim_res $query_file $author_file.vec sbs_${xtag} recall_res_${xtag}.$date 
 }
 
 
@@ -78,12 +81,17 @@ function main_f()
 {
     cp ./dev_dir/* .
     get_latest_model
-    get_cate_vec first.txt
-    get_cate_vec second.txt
-    get_cate_vec third.txt
-    get_recall_res first.txt cate1 &
-    get_recall_res second.txt cate2 &
-    get_recall_res third.txt cate3 &
+    get_cate_vec first.txt_mapping
+    get_cate_vec second.txt_mapping
+    get_cate_vec third.txt_mapping
+    get_recall_res first.txt_mapping  cate1 $cur_query_ecom_file &
+    get_recall_res second.txt_mapping cate2 $cur_query_ecom_file &
+    get_recall_res third.txt_mapping  cate3 $cur_query_ecom_file &
+
+    get_recall_res first.txt_mapping  cate1 $cur_query_not_ecom_file &
+    get_recall_res second.txt_mapping cate2 $cur_query_not_ecom_file &
+    get_recall_res third.txt_mapping  cate3 $cur_query_not_ecom_file &
+
     wait
     return 0
 }

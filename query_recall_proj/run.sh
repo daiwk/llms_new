@@ -9,7 +9,7 @@ set -x
 date=`date -d "2 day ago" +"%Y%m%d"`
 date=`date -d "1 day ago" +"%Y%m%d"`
 
-hadoop_prefix="hdfs://"
+hadoop_prefix="hdfs://haruna"
 hadoop_cmd="hadoop"
 python3=python3
 python2=python2
@@ -53,14 +53,18 @@ function get_query()
         $hadoop_cmd fs -cat $hadoop_prefix/first_name_new/date=$date/part* > $cur_first_name &
         $hadoop_cmd fs -cat $hadoop_prefix/second_name_new/date=$date/part* > $cur_second_name &
         $hadoop_cmd fs -cat $hadoop_prefix/third_name_new/date=$date/part* > $cur_third_name &
+        $hadoop_cmd fs -cat $hadoop_prefix/all_cates_raw/date=$date/* > ./all_cates &
+        # $hadoop_cmd fs -cat $hadoop_prefix/user_gip_query_history/date=$date/part* > $user_query_file &
         wait
+        python3 ./gen_cates.py ./all_cates
     else
         cp $cur_query_file.head $cur_query_file
     fi
 
-    grep -v '\\N' $cur_first_name | awk -F'\1' '{print $1}' > first.txt    
-    grep -v '\\N' $cur_second_name | awk -F'\1' '{print $1}' > second.txt    
-    grep -v '\\N' $cur_third_name | awk -F'\1' '{print $1}' > third.txt    
+    # grep -v '\\N' $cur_first_name | awk -F'\1' '{print $1}' > first.txt    
+    # grep -v '\\N' $cur_second_name | awk -F'\1' '{print $1}' > second.txt    
+    # grep -v '\\N' $cur_third_name | awk -F'\1' '{print $1}' > third.txt    
+    python gen_cates.py ./all_cates
 
 }
 
@@ -83,7 +87,7 @@ function parallel_get_sim_res()
     wait
     cat ./$all_file*.save.$prefix > ./$all_file.save.$prefix
     wc -l ./$all_file*
-    xtarget_path=$hadoop_prefix//recall_res/${prefix}recall_res/
+    xtarget_path=$hadoop_prefix/recall_res/${prefix}recall_res/
     $hadoop_cmd fs -mkdir $xtarget_path
     target_path=$xtarget_path/date=$date/
     $hadoop_cmd fs -rm -r $target_path
@@ -126,12 +130,12 @@ function main_f()
 {
     get_latest_model
     get_query 
-    get_cate_vec first.txt
-    get_cate_vec second.txt
-    get_cate_vec third.txt
-    get_recall_res first.txt cate1 &
-    get_recall_res second.txt cate2 &
-    get_recall_res third.txt cate3 &
+    get_cate_vec first.txt_mapping
+    get_cate_vec second.txt_mapping
+    get_cate_vec third.txt_mapping
+    get_recall_res first.txt_mapping cate1 &
+    get_recall_res second.txt_mapping cate2 & 
+    get_recall_res third.txt_mapping cate3 &
     wait
     return 0
 }
