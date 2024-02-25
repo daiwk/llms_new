@@ -8,6 +8,7 @@ BATCH_SIZE=tf.shape(uid_embedding)[0]
 BATCH_SIZE_G=tf.shape(gid_embedding)[0]
 
 ## alignment：正样本对之间的特征相似程度，
+## e^{2t-2t*内积}，内积越大，距离越近，要最小化这个
 def alg(src_emb, pos_emb, mt, coef): 
     mt = tf.expand_dims(mt, axis=1)
     # mt = tf.Print(mt, ['debug label:', mt], summarize=1024)
@@ -22,6 +23,7 @@ def alg(src_emb, pos_emb, mt, coef):
     return tf.reduce_sum(exp_coe)
 
 ## uniformity：特征向量的分布的均匀程度
+## w*e^{2t*内积-t}，内积越小，距离越远，要最小化这个
 def uif(emb, t=3, wt=256.0): 
     prod = tf.matmul(emb, tf.transpose(emb))
     # prod = tf.Print(prod, ['debug prod:', prod], summarize=1024)
@@ -53,7 +55,7 @@ rgid_emb = tf.reshape(tf.tile(rgid_embedding, [1,RGID_MAX_SIZE]), [BATCH_SIZE_G*
 alpha = 0.5
 beta = 0.5
 coef = tf.ones_like(tf.expand_dims(label, axis=1))
-## 1. 如果这个gid是正样本，那gid和rgid们要尽量接近，如果是负样本，则gid和rgid们要尽量远
+## 1. 如果这个gid是正样本，那gid和rgid们要尽量接近，如果是负样本，则gid和rgid们要尽量远()
 ## 2. gid和别的gid们要尽量分散
 ## 3. rgid内部也要尽量分散
 loss = alpha * alg(src_emb, rgid_emb, label, coef)+ beta * uif(src_emb) + beta * uif(rgid_emb)
