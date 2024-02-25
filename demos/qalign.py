@@ -8,7 +8,7 @@ BATCH_SIZE=tf.shape(uid_embedding)[0]
 BATCH_SIZE_G=tf.shape(gid_embedding)[0]
 
 ## alignment：正样本对之间的特征相似程度，
-## e^{2t-2t*内积}，内积越大，距离越近，要最小化这个
+## e^{label*(2t-2t*内积)}，内积越大，距离越近，要最小化这个
 def alg(src_emb, pos_emb, mt, coef): 
     mt = tf.expand_dims(mt, axis=1)
     # mt = tf.Print(mt, ['debug label:', mt], summarize=1024)
