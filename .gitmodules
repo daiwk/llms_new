@@ -1,0 +1,4 @@
+[submodule "sbert_proj/sentence-transformers"]
+	path = sbert_proj/sentence-transformers
+	url = https://github.com/daiwk/sentence-transformers.git
+	branch = master
