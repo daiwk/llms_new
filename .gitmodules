@@ -2,3 +2,6 @@
 	path = bert/sbert_proj/sentence-transformers
 	url = https://github.com/daiwk/sentence-transformers.git
 	branch = master
+[submodule "serving/vllm"]
+	path = serving/vllm
+	url = https://github.com/daiwk/vllm.git
