@@ -5,8 +5,8 @@
 [submodule "serving/vllm"]
 	path = serving/vllm
 	url = https://github.com/daiwk/vllm.git
-	branch = master
+	branch = main
 [submodule "llm/mistra/mistral-src"]
 	path = llm/mistra_proj/mistral-src
 	url = https://github.com/daiwk/mistral-src.git
-	branch = master
+	branch = main
