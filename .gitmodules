@@ -10,3 +10,7 @@
 	path = llm/mistral_proj/mistral-src
 	url = https://github.com/daiwk/mistral-src.git
 	branch = main
+[submodule "llm/llama_proj/llama"]
+	path = llm/llama_proj/llama
+	url = https://github.com/daiwk/llama.git
+	branch = main
