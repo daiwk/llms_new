@@ -8,6 +8,3 @@
 [submodule "llm/mistra/mistral-src"]
 	path = llm/mistra_proj/mistral-src
 	url = https://github.com/daiwk/mistral-src.git
-[submodule "llm_apps/Langchain-Chatchat"]
-	path = llm_apps/Langchain-Chatchat
-	url = https://github.com/daiwk/Langchain-Chatchat.git
