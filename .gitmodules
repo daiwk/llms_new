@@ -17,3 +17,6 @@
 [submodule "llm_rec/generative-recommenders"]
 	path = llm_rec/generative-recommenders
 	url = https://github.com/daiwk/generative-recommenders.git
+[submodule "llm/llama_proj/llama3"]
+	path = llm/llama_proj/llama3
+	url = https://github.com/daiwk/llama3.git
