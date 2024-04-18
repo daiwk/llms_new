@@ -14,3 +14,6 @@
 	path = llm/llama_proj/llama
 	url = https://github.com/daiwk/llama.git
 	branch = main
+[submodule "llm_rec/generative-recommenders"]
+	path = llm_rec/generative-recommenders
+	url = https://github.com/daiwk/generative-recommenders.git
