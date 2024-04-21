@@ -1,0 +1,2 @@
+export GROQ_API_KEY=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
+python3 ./run_groq.py
