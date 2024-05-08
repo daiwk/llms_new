@@ -1,0 +1,7 @@
+[
+    {
+        "model": "gpt-4",
+	"api_key": "xx", 
+        "tags": ["gpt-4", "tool"]
+    },
+]
