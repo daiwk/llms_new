@@ -36,7 +36,12 @@ with open('input.txt', 'r') as f:
             inputs = inputs.to("cuda")
             instances.append(inputs)
         else:
-            tmp_batch.append(line)
+            chat = [
+                        { "role": "user", "content": line},
+                        ]
+            prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
+            print(prompt)
+            tmp_batch.append(prompt)
             idx += 1
 
     ## last batch
