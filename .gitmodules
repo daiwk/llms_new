@@ -20,3 +20,6 @@
 [submodule "llm/llama_proj/llama3"]
 	path = llm/llama_proj/llama3
 	url = https://github.com/daiwk/llama3.git
+[submodule "recsys/SSLRec"]
+	path = recsys/SSLRec
+	url = https://github.com/daiwk/SSLRec.git
