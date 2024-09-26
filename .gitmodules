@@ -26,3 +26,6 @@
 [submodule "llm/gemma_proj/gemma.cpp"]
 	path = llm/gemma_proj/gemma.cpp
 	url = https://github.com/daiwk/gemma.cpp.git
+[submodule "llm_rec/HLLM"]
+	path = llm_rec/HLLM
+	url = https://github.com/daiwk/HLLM.git
