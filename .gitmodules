@@ -29,3 +29,6 @@
 [submodule "llm_rec/HLLM"]
 	path = llm_rec/HLLM
 	url = https://github.com/daiwk/HLLM.git
+[submodule "rl/TimeChamber"]
+	path = rl/TimeChamber
+	url = https://github.com/daiwk/TimeChamber.git
