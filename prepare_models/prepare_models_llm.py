@@ -41,16 +41,17 @@ def save_ds(name, local_name):
 
 
 model_map ={
-     "THUDM/chatglm3-6b": "./chatglm3-6b",
-     "./Meta-Llama-3-8B-Instruct": "./Meta-Llama-3-8B-Instruct",
-     "./Mistral-7B-Instruct-v0.2": "./Mistral-7B-Instruct-v0.2",
-     "./OpenELM-3B-Instruct": "./OpenELM-3B-Instruct",
-     "./Phi-3-mini-128k-instruct": "./Phi-3-mini-128k-instruct",
-     "./gemma-1.1-7b-it": "./gemma-1.1-7b-it",
-     "./recurrentgemma-2b-it": "./recurrentgemma-2b-it",
-     "./Qwen1.5-7B-Chat-GPTQ-Int8": "./Qwen1.5-7B-Chat-GPTQ-Int8",
-     "./Qwen1.5-7B-Chat": "./Qwen1.5-7B-Chat",
-     "./Octopus-v4": "./Octopus-v4",
+	"Qwen/Qwen2.5-7B-Instruct": "./Qwen2.5-7B-Instruct",
+#     "THUDM/chatglm3-6b": "./chatglm3-6b",
+#     "./Meta-Llama-3-8B-Instruct": "./Meta-Llama-3-8B-Instruct",
+#     "./Mistral-7B-Instruct-v0.2": "./Mistral-7B-Instruct-v0.2",
+#     "./OpenELM-3B-Instruct": "./OpenELM-3B-Instruct",
+#     "./Phi-3-mini-128k-instruct": "./Phi-3-mini-128k-instruct",
+#     "./gemma-1.1-7b-it": "./gemma-1.1-7b-it",
+#     "./recurrentgemma-2b-it": "./recurrentgemma-2b-it",
+#     "./Qwen1.5-7B-Chat-GPTQ-Int8": "./Qwen1.5-7B-Chat-GPTQ-Int8",
+#     "./Qwen1.5-7B-Chat": "./Qwen1.5-7B-Chat",
+#     "./Octopus-v4": "./Octopus-v4",
 }
 
 for k in model_map:
