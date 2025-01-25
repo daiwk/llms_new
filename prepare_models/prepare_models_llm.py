@@ -41,7 +41,8 @@ def save_ds(name, local_name):
 
 
 model_map ={
-	"Qwen/Qwen2.5-7B-Instruct": "./Qwen2.5-7B-Instruct",
+	"facebook/opt-125m": "./opt-125m",
+#	"Qwen/Qwen2.5-7B-Instruct": "./Qwen2.5-7B-Instruct",
 #     "THUDM/chatglm3-6b": "./chatglm3-6b",
 #     "./Meta-Llama-3-8B-Instruct": "./Meta-Llama-3-8B-Instruct",
 #     "./Mistral-7B-Instruct-v0.2": "./Mistral-7B-Instruct-v0.2",
