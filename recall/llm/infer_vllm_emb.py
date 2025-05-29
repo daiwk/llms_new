@@ -28,7 +28,7 @@ tensor_parallel_size=1
 pipeline_parallel_size=1
 llm = LLM(merged_model_path, tensor_parallel_size=tensor_parallel_size, distributed_executor_backend="mp", pipeline_parallel_size=pipeline_parallel_size, task="embed")#,  
 
-batch_prompts = ["axxx", "bbb"]
+batch_prompts = ["一个性别为未知的未知年龄用户的视频兴趣是：蔬菜种植，黄瓜种植，龙牙百合，丝瓜种植，冬瓜，农村大席菜，王树国，香瓜，田地，按照时长兴趣强度由高到低点击了如下类别的直播：主播闲聊，美食制作展示，商品销售，山村野食，流行方向。", "bbb"]
 batch_uids = [1, 2]
 
 target_dim = 64
