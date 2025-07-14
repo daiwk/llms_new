@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Mountain Landscape</title>
+    <meta charset="utf-8">
+    <style>body { margin: 0; }</style>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div id="info">Click to toggle contours</div>
+    <script src="terrain-generator.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        // Terrain
+        const terrain = generateTerrain();
+        scene.add(terrain.mesh);
+
+        // Water
+        const water = createRiver(terrain.heightMap);
+        scene.add(water);
+
+        // Camera
+        camera.position.set(50, 50, 50);
+        camera.lookAt(0, 0, 0);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Contour toggle
+        let showContours = false;
+        document.addEventListener('click', toggleContours);
+
+        function toggleContours() {
+            showContours = !showContours;
+            terrain.mesh.material.wireframe = showContours;
+        }
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.005;
+            
+            // Update water animation
+            water.material.uniforms.time.value = time;
+            
+            // Update day/night cycle
+            directionalLight.intensity = Math.sin(time) * 0.5 + 0.5;
+            directionalLight.color.setHSL(Math.sin(time * 0.5) * 0.1 + 0.5, 0.7, 0.5);
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

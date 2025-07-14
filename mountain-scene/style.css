@@ -1,0 +1,21 @@
+body {
+    overflow: hidden;
+    background: #000;
+}
+
+#info {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+canvas {
+    transition: filter 0.5s;
+}
